@@ -1,48 +1,11 @@
+import Mustache from 'mustache';
+
 function toCamelCase(str) {
   return str.replace(/-([mce-z])/gi, function(g) {
     return g[1].toUpperCase();
   }); 
 }
 
-/**
- * window.foo = {
- *   bar: {
- *     a: {
- *       b: {
- *         'c-end': 'hello'
- *       }
- *     }
- *   }
- * }
- * 
- * console.log(str2Obj("foo.bar.a.b['c-end']"))
- * console.log(str2Obj(`foo['bar'].a["b"]['c-end']`))
- * console.log(str2Obj(`bar.a["b"]['c-end']`, foo))
- * console.log(str2Obj(`foo['error'].a["b"].c`, window, true))// 
- */
-function str2Val(str, scope=window) {
-  const keys = str.split(/[\.\[\]'"]/).filter(e => e);
-  let ret = scope;
-  
-  try {
-    keys.forEach(function(key) {
-      ret = ret[key];
-    });
-    return ret;
-  } catch(e) {
-    return undefined;
-  }
-}
-
-/**
- * Observe attribute change and execute the given callback
- * @example
- *   observeAttrsChange(el, (attr, val) => {
- *     if (attr === 'foo') {
- *       console.log('attribute', attr, 'is changed to', val);
- *     }
- *   }); 
- */
 function observeAttrsChange(el, callback) {
   var observer = new MutationObserver( function(mutations) {
     mutations.forEach(mutation => {
@@ -56,11 +19,6 @@ function observeAttrsChange(el, callback) {
   return observer;
 }
 
-/** 
- * set the given element tabbable by adding tabindex, and click/ENTER event
- * @example
- *   setTabbable(el, _ => this.inputEl.click());
- */
 function setTabbable(el, fn) {
   if (el.getAttribute('tabindex')) {
     el.addEventListener('keypress', function(event) {
@@ -72,26 +30,42 @@ function setTabbable(el, fn) {
   }
 }
 
-/**
- * returns options and events from attributes
- */
-function attrs2Options(attributes) {
-  const options = {};
-
-  Array.from(attributes).forEach( function(attr) {
-    const optionName = toCamelCase(attr.name);
-    if (attr.value.match(/[\.\[\]]/)) {
-      options[optionName] = str2Val(attr.value);
-    } else {
-      options[optionName] = attr.value;
+function setPropsFromAttrs() {
+  Array.from(this.attributes).forEach( attr => {
+    if (!attr.name.match(/^on-/)) {
+      const propName = toCamelCase(attr.name);
+      try {
+        this[propName] = JSON.parse(attr.value);
+      } catch (e) {
+        this[propName] = attr.value;
+      }
     }
   });
+}
 
-  return options;
+function setEventsFromAttrs() {
+  const elsWithEvents = this.querySelectorAll('*[bind-event]');
+  Array.from(elsWithEvents).forEach( el => {
+    const eventAttrs = 
+      Array.from(el.attributes).filter(attr => attr.name.match(/^on-/));
+    eventAttrs.forEach(attr => {
+      const eventName = toCamelCase(attr.name.replace(/^on-/,''));
+      el.addEventListener(eventName, this[attr.value].bind(this));
+    })
+  });
+}
+
+function setInnerHTML(template) {
+  const template2 = template.replace(/on-[^=]+=/g, m => 'bind-event ' + m);
+  this.innerHTML = Mustache.to_html(template2, this);
 }
 
 const util = {
-  str2Val, observeAttrsChange, setTabbable, attrs2Options
+  setPropsFromAttrs,
+  setEventsFromAttrs,
+  setInnerHTML,
+  observeAttrsChange, 
+  setTabbable
 }
 
 export default util;

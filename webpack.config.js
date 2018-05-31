@@ -38,7 +38,7 @@ module.exports = {
   },
   devtool: '#source-map',
   plugins: [
-    new CleanWebpackPlugin(['dist']),
+    new CleanWebpackPlugin(['dist/*']),
     new ExtractTextPlugin('my-custom-element-library.css'),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
