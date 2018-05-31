@@ -1,0 +1,10 @@
+hello-custom-element {
+  display: inline-block;
+  background: radial-gradient(blue, green);
+  color: #fff;
+  transition: transform .2s ease-out;
+  padding: 12px;
+  .code {
+    font: 12px Courier New
+  }
+}

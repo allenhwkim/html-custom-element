@@ -1,0 +1,25 @@
+<div class="hello-world">
+  <h1>Hello {{message}}</h1>
+
+  <div>
+    The following message updated by `updateNotice(msg)`
+    <br/>
+    message: <b class="notice">{{notice}}</b>
+    <br/>
+    To test it, run the following in console
+    <div class="code">
+      document.querySelector('hello-custom-element').updateNotice('foo');
+    </div>
+  </div>
+  <br/>
+
+  <div>
+    <button class="fire-event">Fire `my-event`</button>
+    <br/>
+    To test event, run the following in console
+    <div class="code">
+      document.body.addEventListener('my-event', e => alert(e.detail));
+    </div>
+  </div>
+  
+</div>
