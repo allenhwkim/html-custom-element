@@ -27,6 +27,7 @@ angular.bootstrap(document.getElementById('app'), ['app']);
 ```
 home.html
 ```html
+<link rel="stylesheet" href="https://unpkg.com/hello-custom-element/dist/hello-custom-element.css" />
 <button ng-click="runCEFunc()">Run Custom Element updateMessage</button>
 
 <hello-custom-element ce-one-way
@@ -56,6 +57,7 @@ document.querySelector('hello-custom-element').ngFunc = $scope.myNgFunc.bind($sc
 ### Example For Angular 6
 app.component.html
 ```html
+<link rel="stylesheet" href="https://unpkg.com/hello-custom-element/dist/hello-custom-element.css" />
 <button (click)="runCEFunc()">Run Custom Element updateMessage</button>
 <hello-custom-element #customElement
   (my-event)="myNgFunc($event)"
@@ -66,6 +68,8 @@ app.component.html
 ```
 app.component.ts
 ```Typescript
+import 'angular-custom-elements';
+
 @Component({...})
 export class AppComponent  {
   world = 'Angular6 + Custom Element'
@@ -104,6 +108,7 @@ window.onload = function() {
 ```
 app.html
 ```html
+<link rel="stylesheet" href="https://unpkg.com/hello-custom-element/dist/hello-custom-element.css" />
 <button onclick="runCEFunc(event)">Run Custom Element updateMessage</button>
 <hello-custom-element
   world="Javascript + Custom Element"
