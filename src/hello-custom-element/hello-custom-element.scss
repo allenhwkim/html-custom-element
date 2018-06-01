@@ -7,4 +7,19 @@ hello-custom-element {
   .code {
     font: 12px Courier New
   }
+
+  @keyframes yellowfade {
+    from {
+      background: yellow;
+      color: #333;
+    }
+    to {
+      background: transparent;
+      color: #fff;
+    }
+  }
+
+  .yellowfade {
+    animation: yellowfade 2s;
+  }
 }

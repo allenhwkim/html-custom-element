@@ -23,7 +23,10 @@ class HelloCustomElement extends HTMLElement {
   }
 
   updateMessage(message) {
-    this.querySelector('.message').innerHTML = message;
+    const msgEl = this.querySelector('.message');
+    msgEl.innerHTML = message;
+    msgEl.classList.remove('yellowfade');
+    setTimeout(_ => msgEl.classList.add('yellowfade'));
   }
 
   runNgFunc(e) {
