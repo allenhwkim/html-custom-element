@@ -40,6 +40,7 @@ function setPropsFromAttrs() {
         this[propName] = attr.value;
       }
     }
+    console.log('attribute', attr, 'this', this);
   });
 }
 
@@ -51,12 +52,15 @@ function setEventsFromAttrs() {
     eventAttrs.forEach(attr => {
       const eventName = toCamelCase(attr.name.replace(/^on-/,''));
       el.addEventListener(eventName, this[attr.value].bind(this));
+      console.log('el', el, 'event', eventName, 'listener', this[attr.value].bind(this));
     })
   });
 }
 
 function setInnerHTML(template) {
+  console.log('setInnerHTML template', template);
   const template2 = template.replace(/on-[^=]+=/g, m => 'bind-event ' + m);
+  console.log('setInnerHTML template2', template2, this);
   this.innerHTML = Mustache.to_html(template2, this);
 }
 
