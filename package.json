@@ -1,7 +1,7 @@
 {
   "name": "hello-custom-element",
   "description": "My Example Custom Element Project",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Allen Kim <allen.kim@rci.rogers.ca>",
   "license": "MIT",
   "main": "dist/hello-custom-element.js",
