@@ -1,2 +1,0 @@
-hello-custom-element{display:inline-block;background:radial-gradient(blue,green);color:#fff;transition:transform .2s ease-out;padding:12px}hello-custom-element .code{font:12px Courier New}@keyframes yellowfade{0%{background:#ff0;color:#333}to{background:transparent;color:#fff}}hello-custom-element .yellowfade{animation:yellowfade 2s}
-/*# sourceMappingURL=hello-custom-element.css.map*/
