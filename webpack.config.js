@@ -6,8 +6,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 module.exports = {
   entry: {
-    'my-custom-element-library.js': './src/index.js',
-    'my-custom-element-library.css': './src/index.scss',
+    'hello-custom-element.js': './src/index.js',
+    'hello-custom-element.css': './src/index.scss',
   },
   output: {
     path: path.resolve(__dirname, './dist'),
@@ -39,7 +39,7 @@ module.exports = {
   devtool: '#source-map',
   plugins: [
     new CleanWebpackPlugin(['dist/*']),
-    new ExtractTextPlugin('my-custom-element-library.css'),
+    new ExtractTextPlugin('hello-custom-element.css'),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
