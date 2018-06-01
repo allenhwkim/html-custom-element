@@ -19,6 +19,7 @@ npm run build
 ### Example For Angular 1
 app.js
 ```Javascript
+import 'hello-custom-element';
 import 'angular-custom-elements';
 ...
 window.app = angular.module('app', [ ..., 'robdodson.ce-bind']);
