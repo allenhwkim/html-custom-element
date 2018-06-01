@@ -4,7 +4,8 @@ const template = require('./hello-custom-element.html');
 
 class HelloCustomElement extends HTMLElement {
   connectedCallback() {
-    console.log('connectedCallback', this);
+    console.dir('connectedCallback', this);
+    console.log('connectedCallback', this.world, this.message);
     util.setPropsFromAttrs.bind(this)();    // 1st
     util.setInnerHTML.bind(this)(template); // 2nd
     util.setEventsFromAttrs.bind(this)();   // 3rd
