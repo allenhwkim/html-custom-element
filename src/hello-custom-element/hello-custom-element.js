@@ -2,7 +2,7 @@
 import util from '../util';
 const template = require('./hello-custom-element.html');
 
-class HelloCustomElement extends HTMLElement {
+export class HelloCustomElement extends HTMLElement {
   connectedCallback() {
     console.dir('connectedCallback', this);
     console.log('connectedCallback', this.world, this.message);
@@ -29,4 +29,3 @@ class HelloCustomElement extends HTMLElement {
   }
 
 }
-customElements.define('hello-custom-element', HelloCustomElement);

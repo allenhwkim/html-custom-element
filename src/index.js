@@ -17,5 +17,8 @@
 })();
 
 import 'document-register-element';
-import './hello-custom-element/hello-custom-element.js';
-import './hello-clock/hello-clock.js';
+import { HelloCustomElement } from './hello-custom-element/hello-custom-element.js';
+import { HelloClock } from './hello-clock/hello-clock.js';
+
+customElements.define('hello-clock', HelloClock);
+customElements.define('hello-custom-element', HelloCustomElement);

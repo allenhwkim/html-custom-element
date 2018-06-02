@@ -1,7 +1,7 @@
 import util from '../util';
 const template = require('./hello-clock.html');
 
-class HelloClock  extends HTMLElement {
+export class HelloClock  extends HTMLElement {
   connectedCallback() {
     util.setPropsFromAttrs.bind(this)();    // 1st
     util.setInnerHTML.bind(this)(template); // 2nd
@@ -25,4 +25,3 @@ class HelloClock  extends HTMLElement {
     this.querySelector('.clock-animations').innerHTML = `<style>${stylesDeg.join('')}</style>`;
   }
 }
-customElements.define('hello-clock', HelloClock);
