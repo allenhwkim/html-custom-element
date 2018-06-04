@@ -6,15 +6,16 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 module.exports = {
   entry: {
-    'index.js': './src/index.js',
+    'hello-custom-element.umd.js': './src/index.js',
     // 'hello-custom-element.css': './src/index.scss',
     'hello-custom-element.min.js': './src/browser.js'
   },
   output: {
-    library: '[name]',
-    libraryTarget: 'umd',
     path: path.resolve(__dirname, './dist'),
-    filename: '[name]'
+    filename: '[name]',
+    library: 'hello-custom-element',
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   module: {
     rules: [
