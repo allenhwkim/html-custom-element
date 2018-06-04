@@ -11,6 +11,8 @@ module.exports = {
     'hello-custom-element.min.js': './src/browser.js'
   },
   output: {
+    library: '[name]',
+    libraryTarget: 'umd',
     path: path.resolve(__dirname, './dist'),
     filename: '[name]'
   },
