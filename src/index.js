@@ -6,7 +6,7 @@ import { HelloClock } from './hello-clock/hello-clock.js';
 
 // For SPA, which calls the same js many times
 function defineIfNotDefined(name, klass) {
-  !customElements.get(name) && customElements(name, klass);
+  !customElements.get(name) && customElements.define(name, klass);
 }
 
 export const CustomElements = {
