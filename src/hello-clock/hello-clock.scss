@@ -1,12 +1,8 @@
 hello-clock {
-  .my-clock {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    display: inline-block;
-    width: 250px;
-    height: 250px;
-  }
+  display: inline-block;
+  width: 300px;
+  height: 300px;
+  position: relative;
   .clock-wrapper{
     position: absolute;
     top: 50%;

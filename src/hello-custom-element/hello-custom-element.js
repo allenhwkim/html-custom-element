@@ -1,14 +1,12 @@
-// import '../custom-element-polyfill.js';
-import util from '../util';
-const template = require('./hello-custom-element.html');
+import {HTMLCustomElement} from '../html-custom-element';
 
-export class HelloCustomElement extends HTMLElement {
-  connectedCallback() {
-    console.dir('connectedCallback', this);
-    console.log('connectedCallback', this.world, this.message);
-    util.setPropsFromAttrs.bind(this)();    // 1st
-    util.setInnerHTML.bind(this)(template); // 2nd
-    util.setEventsFromAttrs.bind(this)();   // 3rd
+const template = require('./hello-custom-element.html');
+const css = require('./hello-custom-element.scss');
+
+export class HelloCustomElement extends HTMLCustomElement {
+  init() {
+    this.template = template;
+    this.css = css;
   }
 
   updateMessage(message) {

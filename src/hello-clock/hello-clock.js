@@ -1,11 +1,16 @@
-import util from '../util';
-const template = require('./hello-clock.html');
+import { HTMLCustomElement } from '../html-custom-element.js';
 
-export class HelloClock  extends HTMLElement {
+const template = require('./hello-clock.html');
+const css = require('./hello-clock.scss');
+
+export class HelloClock  extends HTMLCustomElement {
+  init() {
+    this.template = template;
+    this.css = css;
+  }
+  
   connectedCallback() {
-    util.setPropsFromAttrs.bind(this)();    // 1st
-    util.setInnerHTML.bind(this)(template); // 2nd
-    util.setEventsFromAttrs.bind(this)();   // 3rd
+    super.connectedCallback();
     this.addAnimations();
   }
 
