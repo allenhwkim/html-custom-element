@@ -1,7 +1,6 @@
 import * as Mustache from 'mustache';    
 
 import 'document-register-element'; // IE11/FF CustomElement polyfill
-import * as PromisePolyfill from 'promise-polyfill'; // IE11 Promise polyfill
 import 'whatwg-fetch'; // IE11 fetch polyfill
 
 // new CustomEvent not working on IE11.
@@ -23,10 +22,6 @@ if (!window.CustomEvent) {
 
   CustomEvent.prototype = window.Event.prototype;
   window.CustomEvent = CustomEvent;
-}
-
-if (!window.Promise) {
-  window.Promise = PromisePolyfill;
 }
 
 function hashCode(str) {
