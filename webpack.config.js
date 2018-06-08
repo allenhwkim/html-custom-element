@@ -2,18 +2,17 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const pkgJson = require('./lib/package.json');
+const pkgJson = require('./package.json');
 
 let config = {
-  context: __dirname + "/lib",
   entry: {
-    [pkgJson.name]: './src/index.ts',
+    [pkgJson.name]: './lib/src/',
   },
   resolve: {
     extensions: [".ts", ".js"]
   },
   output: {
-    path: path.resolve(__dirname, './lib/dist'),
+    path: path.resolve(__dirname, './dist'),
     filename: '[name].umd.js',
     library: pkgJson.name,
     libraryTarget: 'umd',
@@ -41,9 +40,16 @@ let config = {
       }
     ]
   },
+  resolve: {
+    alias: { 
+      // 'html-custom-element': path.resolve(__dirname, 'lib')
+      'html-custom-element': path.resolve(__dirname, 'lib/src/')
+    },
+    extensions: ['.js', '.ts']
+  },
   devtool: '#source-map',
   plugins: [
-    new CleanWebpackPlugin(['lib/dist/*']),
+    new CleanWebpackPlugin(['dist/*']),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
@@ -55,16 +61,8 @@ let config = {
 
 if (process.env.NODE_ENV === 'development') {
   config = Object.assign(config, {
-    context: __dirname,
-    resolve: {
-      alias: { 
-        // 'html-custom-element': path.resolve(__dirname, 'lib')
-        'html-custom-element': path.resolve(__dirname, 'lib/src/')
-      },
-      extensions: ['.js', '.ts']
-    },
     entry: {
-      app: './app/index.ts'
+      app: './app/'
     },
     output: {
       path: path.resolve(__dirname, './dist'),
@@ -81,7 +79,6 @@ if (process.env.NODE_ENV === 'development') {
       })
     ]
   });
-console.log('xxxxxxxxxxxxxx config', config);
 }
 
 module.exports = config;

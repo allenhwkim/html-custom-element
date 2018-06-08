@@ -1,4 +1,11 @@
 {
+  "name": "html-custom-element",
+  "description": "Custom Element Wrapper",
+  "version": "0.1.0",
+  "author": "Allen Kim <allenhwkim@gmail.com>",
+  "license": "MIT",
+  "main": "dist/html-custom-element.umd.js",
+  "typings": "dist/src/index.d.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack-dev-server --open --compress",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
@@ -7,8 +14,6 @@
     "type": "git",
     "url": "git+https://github.com/allenhwkim/html-custom-element.git"
   },
-  "author": "Allen Kim <allenhwkim@gmail.com>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/allenhwkim/html-custom-element/issues"
   },
