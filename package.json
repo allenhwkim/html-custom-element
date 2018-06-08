@@ -19,12 +19,12 @@
   },
   "homepage": "https://github.com/allenhwkim/html-custom-element#readme",
   "devDependencies": {
-    "cross-env": "^5.0.5",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-3": "^6.24.1",
     "clean-webpack-plugin": "^0.1.19",
+    "cross-env": "^5.0.5",
     "css-loader": "^0.28.7",
     "document-register-element": "^1.9.0",
     "extract-text-webpack-plugin": "^3.0.2",
@@ -32,6 +32,7 @@
     "html-webpack-plugin": "^3.2.0",
     "mustache": "^2.3.0",
     "node-sass": "^4.9.0",
+    "promise-polyfill": "^8.0.0",
     "raw-loader": "^0.5.1",
     "sass-loader": "^6.0.6",
     "style-loader": "^0.21.0",
@@ -39,6 +40,7 @@
     "ts-loader": "^3.5.0",
     "typescript": "^2.9.1",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "webpack-dev-server": "^2.9.1",
+    "whatwg-fetch": "^2.0.4"
   }
 }

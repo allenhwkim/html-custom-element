@@ -1,11 +1,12 @@
-import 'document-register-element'; // IE11/FF polyfill
 import * as Mustache from 'mustache';    
 
-// new CustomEvent not working on IE11.
-(function () {
-  if (!window.CustomEvent) return false;      
+import 'document-register-element'; // IE11/FF CustomElement polyfill
+import * as PromisePolyfill from 'promise-polyfill'; // IE11 Promise polyfill
+import 'whatwg-fetch'; // IE11 fetch polyfill
 
-  function CustomEvent ( event, params ) {
+// new CustomEvent not working on IE11.
+if (!window.CustomEvent) {
+  let CustomEvent = function(event, params) {
     params = params || { 
       bubbles: false, 
       cancelable: false
@@ -22,7 +23,11 @@ import * as Mustache from 'mustache';
 
   CustomEvent.prototype = window.Event.prototype;
   window.CustomEvent = CustomEvent;
-})();
+}
+
+if (!window.Promise) {
+  window.Promise = PromisePolyfill;
+}
 
 function hashCode(str) {
   var hash = 0;

@@ -2,14 +2,17 @@ import {HTMLCustomElement} from 'html-custom-element';
 
 const template = `
   <div on-click="foo" class="hello-ce">
-    Hello {{world}}
+    <h3>Hello {{world}}.</h3>
+    Click me to fire CustomEvent \`foo\`;
   </div>`;
+
 const css = `
 @keyframes {
   blah;
 }
 .hello-ce { 
-  width: 100px; 
+  display: inline-block;
+  min-width: 100px; 
   height: 100px;
   background: blue;
   color: #fff

@@ -1,4 +1,5 @@
 import 'document-register-element';
+import 'whatwg-fetch';
 export declare class HTMLCustomElement extends HTMLElement {
     template: any;
     css: any;
