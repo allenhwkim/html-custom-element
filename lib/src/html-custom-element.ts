@@ -1,13 +1,22 @@
-import Mustache from 'mustache';
+import 'document-register-element'; // IE11/FF polyfill
+import * as Mustache from 'mustache';    
 
 // new CustomEvent not working on IE11.
 (function () {
-  if ( typeof window.CustomEvent === "function" ) return false;
+  if (!window.CustomEvent) return false;      
 
   function CustomEvent ( event, params ) {
-    params = params || { bubbles: false, cancelable: false, detail: undefined };
+    params = params || { 
+      bubbles: false, 
+      cancelable: false
+    };
     var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    evt.initCustomEvent(
+      event,
+      params.bubbles,
+      params.cancelable,
+      params.detail
+    );
     return evt;
    }
 
@@ -25,14 +34,17 @@ function hashCode(str) {
 }
 
 function toCamelCase(str) {
-  return str.replace(/-([mce-z])/gi, function(g) {
+  return (str||'').replace(/-([a-z])/gi, function(g) {
     return g[1].toUpperCase();
   }); 
 }
 
 function setProps() {
+  const htmlAttrs = /^(on.*|aria-.*|data-.*|class|dir|hidden|id|is|lang|style|tabindex|title)$/;
   Array.from(this.attributes).forEach( attr => {
-    if (!attr.name.match(/^on-/)) {
+    if (attr.name.match(htmlAttrs)) { 
+      // console.log('skipping', attr)
+    } else {
       const propName = toCamelCase(attr.name);
       try {
         this[propName] = JSON.parse(attr.value);
@@ -49,7 +61,10 @@ function setEvents() {
     Array.from(elWithEvent.attributes).forEach(attr => {
       if (attr.name.match(/^on-/)) {
         const eventName = toCamelCase(attr.name.replace(/^on-/,''));
-        elWithEvent.addEventListener(eventName, this[attr.value].bind(this));
+        elWithEvent.addEventListener(
+          eventName, 
+          this[attr.value].bind(this)
+        );
       }
     })
   });
@@ -62,7 +77,7 @@ function setStyleEl() {
     this.styleEl.numEl++;
   } else {
     const styleEl = document.createElement('style');
-    const scopedCss = this.css.replace(/^([^\ ]+)/gm, m => `${m}[${hash}]`);
+    const scopedCss = this.css.replace(/^([^@][a-z\.\ ])+\{/gm, m => `[${hash}] ${m}`);
     styleEl.appendChild(document.createTextNode(scopedCss));
     styleEl.setAttribute(hash, '');
     styleEl.numEl = 1;
@@ -74,7 +89,17 @@ function setStyleEl() {
 
 // base class for all custom element
 export class HTMLCustomElement extends HTMLElement {
-  constructor(self) { 
+  template: any;
+  css: any;
+  styleEl: any;
+
+  static define(tagName, klass) {
+    if (!customElements.get(tagName)) {
+      customElements.define(tagName, klass);
+    }
+  }
+
+  constructor(self) {
     self = super(self);
     self.init();
     return self;
@@ -83,18 +108,10 @@ export class HTMLCustomElement extends HTMLElement {
   init() { /* override as you like */ }
 
   connectedCallback() {
-    setProps.bind(this)(); // set props from attributes
-    // set DOM with {{..}} replaced and added with bind-event
-    if (this.template) {
-      const newHtml = this.template.replace(/on-[^=]+=/g, m => 'bind-event ' + m);
-      this.innerHTML = Mustache.to_html(newHtml, this);
-      setEvents.bind(this)(); // register event listerner to on-* element
-    }
-    if (this.css) {
-      setStyleEl.bind(this)();  // insert <style> tag into header
-    }
+    this.render();
   }
 
+  // remove style tag if not in use
   disconnectedCallback() {
     if (this.styleEl) {
       this.styleEl.numEl--;
@@ -103,4 +120,24 @@ export class HTMLCustomElement extends HTMLElement {
       }
     }
   } 
+
+  render() {
+    // some framework bind properties after DOM rendered
+    // so set propertes after rendering cycle
+    return new Promise( resolve => {
+      setTimeout(_ => {
+        setProps.bind(this)(); // set props from attributes
+        // set DOM with {{..}} replaced and added with bind-event
+        if (this.template) {
+          const newHtml = this.template.replace(/on-[^=]+=/g, m => 'bind-event ' + m);
+          this.innerHTML = Mustache.to_html(newHtml, this);
+          setEvents.bind(this)(); // register event listerner to on-* element
+        }       
+        if (this.css) {
+          setStyleEl.bind(this)();  // insert <style> tag into header
+        }
+        resolve(this);
+      });
+    });
+  }
 }

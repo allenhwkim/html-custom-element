@@ -1,24 +1,31 @@
-const path = require('path')
-const webpack = require('webpack')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-// const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const pkgJson = require('./lib/package.json');
 
-module.exports = {
+let config = {
+  context: __dirname + "/lib",
   entry: {
-    'hello-custom-element.umd.js': './src/index.js',
-    // 'hello-custom-element.css': './src/index.scss',
-    'hello-custom-element.min.js': './src/browser.js'
+    [pkgJson.name]: './src/index.ts',
+  },
+  resolve: {
+    extensions: [".ts", ".js"]
   },
   output: {
-    path: path.resolve(__dirname, './dist'),
-    filename: '[name]',
-    library: 'hello-custom-element',
+    path: path.resolve(__dirname, './lib/dist'),
+    filename: '[name].umd.js',
+    library: pkgJson.name,
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        loader: 'ts-loader',
+        options: { ignoreDiagnostics: [2551, 2554, 2339] }
+      },
       {
         test: /\.html$/,
         loader: 'raw-loader'
@@ -32,22 +39,11 @@ module.exports = {
         test:/\.scss$/,
         use:['to-string-loader', 'css-loader', 'sass-loader']
       }
-      // {
-      //   test: /\.[s]?css$/,
-      //   use: ExtractTextPlugin.extract({
-      //     fallback: 'style-loader',
-      //     use: [
-      //       { loader: 'css-loader', options: { minimize: true } },
-      //       'sass-loader'
-      //     ]
-      //   })
-      // }
     ]
   },
   devtool: '#source-map',
   plugins: [
-    new CleanWebpackPlugin(['dist/*']),
-    // new ExtractTextPlugin('hello-custom-element.css'),
+    new CleanWebpackPlugin(['lib/dist/*']),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
@@ -58,14 +54,34 @@ module.exports = {
 }
 
 if (process.env.NODE_ENV === 'development') {
-  module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
-      inject: true
-    })
-  ]);
+  config = Object.assign(config, {
+    context: __dirname,
+    resolve: {
+      alias: { 
+        // 'html-custom-element': path.resolve(__dirname, 'lib')
+        'html-custom-element': path.resolve(__dirname, 'lib/src/')
+      },
+      extensions: ['.js', '.ts']
+    },
+    entry: {
+      app: './app/index.ts'
+    },
+    output: {
+      path: path.resolve(__dirname, './dist'),
+      filename: '[name].js'
+    },
+    plugins: [
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NamedModulesPlugin(),
+      new webpack.NoEmitOnErrorsPlugin(),
+      new HtmlWebpackPlugin({
+        filename: 'index.html',
+        template: 'app/index.html',
+        inject: true
+      })
+    ]
+  });
+console.log('xxxxxxxxxxxxxx config', config);
 }
+
+module.exports = config;
