@@ -5,7 +5,7 @@
   "author": "Allen Kim <allenhwkim@gmail.com>",
   "license": "MIT",
   "main": "dist/html-custom-element.umd.js",
-  "typings": "dist/src/index.d.ts",
+  "typings": "dist/lib/src/index.d.ts",
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack-dev-server --open --compress",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
