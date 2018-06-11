@@ -1,6 +1,6 @@
 # html-custom-element
 
-> HTML5 Custom Element Wrapper
+> HTML5 Custom Element Wrapper (IE11/Chrome/Safari/FF compatible)
 
 ## Install
 ```
