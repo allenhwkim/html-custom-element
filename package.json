@@ -21,6 +21,8 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "babel-plugin-transform-es2015-classes": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-3": "^6.24.1",
     "clean-webpack-plugin": "^0.1.19",
