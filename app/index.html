@@ -4,7 +4,15 @@
     <p>Your have bundled your library.</p>
 
     <hello-custom-element 
+      aria-text="ignore this binding"
+      class="ignore this binding"
+      dir="ignore this binding"
+      lang="ignore this binding"
+      tabindex="ignore this binding"
+      title="ignore this binding"
+      ignore="Ignore this binding"
       world="Custom Element">
     </hello-custom-element>
+    <script>document.querySelector('hello-custom-element').ignore="property set";</script>
   </body>
 </html>
