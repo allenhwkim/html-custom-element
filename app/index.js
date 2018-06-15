@@ -19,9 +19,10 @@ const css = `
 }`; 
 
 export class HelloCustomElement extends HTMLCustomElement {
-  init() {
+  connectedCallback() {
     this.template = template;
     this.css = css;
+    this.render();
   }
 
   foo() {
