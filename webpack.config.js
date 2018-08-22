@@ -6,10 +6,10 @@ const pkgJson = require('./package.json');
 
 let config = {
   entry: {
-    [pkgJson.name]: './lib/src/',
+    [pkgJson.name]: './src',
   },
   resolve: {
-    extensions: [".ts", ".js"]
+    extensions: [".js"]
   },
   output: {
     path: path.resolve(__dirname, './dist'),
@@ -20,11 +20,6 @@ let config = {
   },
   module: {
     rules: [
-      {
-        test: /\.ts$/,
-        loader: 'ts-loader',
-        options: { ignoreDiagnostics: [2551, 2554, 2339] }
-      },
       {
         test: /\.html$/,
         loader: 'raw-loader'
@@ -42,10 +37,9 @@ let config = {
   },
   resolve: {
     alias: { 
-      // 'html-custom-element': path.resolve(__dirname, 'lib')
-      'html-custom-element': path.resolve(__dirname, 'lib/src/')
+      'html-custom-element': path.resolve(__dirname, 'src')
     },
-    extensions: ['.js', '.ts']
+    extensions: ['.js']
   },
   devtool: '#source-map',
   plugins: [
@@ -62,7 +56,7 @@ let config = {
 if (process.env.NODE_ENV === 'development') {
   config = Object.assign(config, {
     entry: {
-      app: './app/'
+      app: './demo'
     },
     output: {
       path: path.resolve(__dirname, './dist'),
@@ -74,7 +68,7 @@ if (process.env.NODE_ENV === 'development') {
       new webpack.NoEmitOnErrorsPlugin(),
       new HtmlWebpackPlugin({
         filename: 'index.html',
-        template: 'app/index.html',
+        template: 'demo/index.html',
         inject: true
       })
     ]
