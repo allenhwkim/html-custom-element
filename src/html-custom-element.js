@@ -117,7 +117,7 @@ export class HTMLCustomElement extends HTMLElement {
         setProps.bind(this)(); // set props from attributes
         // set DOM with {{..}} replaced and added with bind-event
         if (this.template) {
-          const newHtml = this.template.replace(/on-[^=]+=/g, m => 'bind-event ' + m);
+          const newHtml = this.template.replace(/ on-[^\ =]+=/g, m => ' bind-event' + m);
           this.innerHTML = Mustache.to_html(newHtml, this);
           setEvents.bind(this)(); // register event listerner to on-* element
         }       

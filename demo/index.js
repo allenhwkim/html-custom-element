@@ -1,7 +1,7 @@
 import {HTMLCustomElement} from 'html-custom-element';
 
 const template = `
-  <div on-click="foo" class="hello-ce">
+  <div class="hello-ce session-indicator" on-click="foo">
     <h3>Hello {{world}}.</h3>
     Click me to fire CustomEvent \`foo\`;
   </div>`;
