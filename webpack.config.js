@@ -5,15 +5,13 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const pkgJson = require('./package.json');
 
 let config = {
-  entry: {
-    [pkgJson.name]: './src',
-  },
-  resolve: {
-    extensions: [".js"]
-  },
+  entry: [
+    'babel-polyfill', 
+    './src/index.js'
+  ],
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: '[name].umd.js',
+    filename: 'html-custom-element.umd.js',
     library: pkgJson.name,
     libraryTarget: 'umd',
     umdNamedDefine: true
@@ -34,12 +32,6 @@ let config = {
         use:['to-string-loader', 'css-loader', 'sass-loader']
       }
     ]
-  },
-  resolve: {
-    alias: { 
-      'html-custom-element': path.resolve(__dirname, 'src')
-    },
-    extensions: ['.js']
   },
   devtool: '#source-map',
   plugins: [

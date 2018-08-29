@@ -1,4 +1,4 @@
-import {HTMLCustomElement} from 'html-custom-element';
+import {HTMLCustomElement} from '../src';
 
 const template = `
   <div class="hello-ce session-indicator" on-click="foo">

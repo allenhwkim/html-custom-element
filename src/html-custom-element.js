@@ -108,7 +108,7 @@ export class HTMLCustomElement extends HTMLElement {
       }
     }
   } 
-
+  
   render() {
     // some framework bind properties after DOM rendered
     // so set propertes after rendering cycle
