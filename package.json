@@ -1,7 +1,7 @@
 {
   "name": "html-custom-element",
   "description": "Custom Element Wrapper",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "author": "Allen Kim <allenhwkim@gmail.com>",
   "license": "MIT",
   "main": "src/index.js",
