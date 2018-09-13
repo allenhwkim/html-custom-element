@@ -2,11 +2,13 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const pkgJson = require('./package.json');
 
 let config = {
   entry: [
-    'babel-polyfill', 
+    // 'babel-polyfill',  
+    'core-js/fn/reflect/construct',  
     './src/index.js'
   ],
   output: {
@@ -41,7 +43,8 @@ let config = {
       compress: {
         warnings: false
       }
-    })
+    }),
+    new CopyWebpackPlugin([{ from: 'typings/*', to: '', flatten: true}])
   ]
 }
 
