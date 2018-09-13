@@ -9,6 +9,7 @@ let config = {
   entry: [
     // 'babel-polyfill',  
     'core-js/fn/reflect/construct',  
+    'core-js/fn/promise',  
     './src/index.js'
   ],
   output: {
