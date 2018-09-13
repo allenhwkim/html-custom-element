@@ -9,8 +9,8 @@ let config = {
   entry: [
     // 'babel-polyfill',   100K
     'core-js/fn/reflect/construct', 
-    'core-js/fn/promise',  
-    'core-js/fn/array',
+    // 'core-js/fn/promise',  
+    // 'core-js/fn/array',
     './src/index.js'
   ],
   output: {
