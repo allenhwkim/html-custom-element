@@ -7,9 +7,10 @@ const pkgJson = require('./package.json');
 
 let config = {
   entry: [
-    // 'babel-polyfill',  
-    'core-js/fn/reflect/construct',  
+    // 'babel-polyfill',   100K
+    'core-js/fn/reflect/construct', 
     'core-js/fn/promise',  
+    'core-js/fn/array',
     './src/index.js'
   ],
   output: {
