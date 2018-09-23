@@ -37,63 +37,66 @@ function toCamelCase(str) {
   }); 
 }
 
-function setProps() {
+function getStyleEl(css) {
+  const hash = hashCode(css);
+  const scopedCss = css.replace(/^([^@][a-z\.\ ])+\{/gm, m => `[${hash}] ${m}`);
+
+  let styleEl = document.querySelector(`style#${hash}`);
+  if (styleEl) {
+    styleEl.numEl++;
+  } else {
+    styleEl = document.createElement('style');
+    styleEl.appendChild(document.createTextNode(scopedCss));
+    styleEl.setAttribute('id', hash);
+    styleEl.numEl = 1;
+    document.head.appendChild(styleEl);
+  }
+
+  return styleEl;
+}
+
+function getPropsFromAttributes(el) {
   const htmlAttrs = /^(on.*|aria-.*|data-.*|class|dir|hidden|id|is|lang|style|tabindex|title)$/;
-  Array.from(this.attributes).forEach( attr => {
-    if (attr.name.match(htmlAttrs)) {  // ignore html common attributes
-    } else {
+  const props = {};
+
+  Array.from(el.attributes).forEach( attr => {
+    if (!attr.name.match(htmlAttrs)) {  // ignore html common attributes
       const propName = toCamelCase(attr.name);
-      if (!this[propName]) {       // ignore if property already assigned
+      if (!el[propName]) {       // ignore if property already assigned
         try {
-          this[propName] = JSON.parse(attr.value);
+          props[propName] = JSON.parse(attr.value);
         } catch (e) {
-          this[propName] = attr.value;
+          props[propName] = attr.value;
         }
       }
     }
   });
+  return props;
 }
 
-function setEvents() {
-  const elsWithEvents = this.querySelectorAll('*[bind-event]');
+/**
+ * add event listener that has on-* attribute
+ */
+function setEventsWithOnAttributes(el) {
+  const elsWithEvents = el.querySelectorAll('*[bind-event]');
   Array.from(elsWithEvents).forEach( elWithEvent => {
     Array.from(elWithEvent.attributes).forEach(attr => {
       if (attr.name.match(/^on-/)) {
         const eventName = toCamelCase(attr.name.replace(/^on-/,''));
-        if (this[attr.value]) {
-          elWithEvent.addEventListener(
-            eventName, 
-            this[attr.value].bind(this)
-          );
+        if (el[attr.value]) {
+          elWithEvent.addEventListener(eventName, el[attr.value].bind(el));
         } else {
-          console.error(`[html-custom-element] ${attr.name} defined, but a function not found in`, this);
+          console.info(`[html-custom-element] ${attr.name} callback not defined`, el.tagName);
         }
       }
     })
   });
 }
 
-function setStyleEl() {
-  const hash = hashCode(this.css);
-  if (document.querySelector(`style[${hash}]`)) {
-    this.styleEl = document.querySelector(`style[${hash}]`);
-    this.styleEl.numEl++;
-  } else {
-    const styleEl = document.createElement('style');
-    const scopedCss = this.css.replace(/^([^@][a-z\.\ ])+\{/gm, m => `[${hash}] ${m}`);
-    styleEl.appendChild(document.createTextNode(scopedCss));
-    styleEl.setAttribute(hash, '');
-    styleEl.numEl = 1;
-    document.head.appendChild(styleEl);
-    this.styleEl = styleEl;
-  }
-  this.setAttribute(hash, '');
-}
-
 // base class for all custom element
 export class HTMLCustomElement extends HTMLElement {
 
-  // Do NOT use constructor buggy on several browsers, FF, IE, Chrome
+  // Do NOT use constructor, buggy on several browsers, FF, IE, Chrome
   // constructor(_) {  return (_ = super(_)).init(), _; }
   // init() { /* override as you like */ }
 
@@ -103,7 +106,10 @@ export class HTMLCustomElement extends HTMLElement {
     }
   }
 
-  // remove style tag if not in use
+  /**
+   * some framework bind properties after DOM rendered
+   * so set propertes after rendering cycle
+   */
   disconnectedCallback() {
     if (this.styleEl) {
       this.styleEl.numEl--;
@@ -113,23 +119,38 @@ export class HTMLCustomElement extends HTMLElement {
     }
   } 
   
-  render() {
-    // some framework bind properties after DOM rendered
-    // so set propertes after rendering cycle
+  /**
+   * some framework bind properties after DOM rendered
+   * so set propertes after rendering cycle
+   */
+  renderWith(template, css) {
     return new Promise( resolve => {
       setTimeout(_ => {
-        setProps.bind(this)(); // set props from attributes
-        // set DOM with {{..}} replaced and added with bind-event
-        if (this.template) {
-          const newHtml = this.template.replace(/ on-[^\ =]+=/g, m => ' bind-event' + m);
-          this.innerHTML = Mustache.to_html(newHtml, this);
-          setEvents.bind(this)(); // register event listerner to on-* element
-        }       
-        if (this.css) {
-          setStyleEl.bind(this)();  // insert <style> tag into header
+        const props = getPropsFromAttributes(this); // user-defined attributes
+        for (var prop in props) {
+          this[prop] = props[prop];
         }
+
+        if (template) {
+          // set DOM with {{..}} replaced and added with bind-event
+          const newHtml = template.replace(/ on-[^\ =]+=/g, m => ' bind-event' + m);
+          this.innerHTML = Mustache.to_html(newHtml, props);
+
+          setEventsWithOnAttributes(this); // register event listerner to on-* element
+        }       
+
+        if (css) {
+          this.styleEl = getStyleEl(css);  // insert <style> tag into header
+          this.setAttribute(this.styleEl.id, ''); // set attribute, e.g., g9k02js84, for stying
+        }
+
         resolve(this);
       });
     });
   }
+
+  render() { 
+    return this.renderWith(this.template, this.css);
+  }
+
 }

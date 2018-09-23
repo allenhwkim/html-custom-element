@@ -1,18 +1,66 @@
 <html>
   <body>
-    <h1>Congratulations !</h1>
-    <p>Your have bundled your library.</p>
+    <h1>Hello html-custom-element !</h1>
 
-    <hello-custom-element 
-      aria-text="ignore this binding"
-      class="ignore this binding"
-      dir="ignore this binding"
-      lang="ignore this binding"
-      tabindex="ignore this binding"
-      title="ignore this binding"
-      ignore="Ignore this binding"
-      world="Custom Element">
-    </hello-custom-element>
-    <script>document.querySelector('hello-custom-element').ignore="property set";</script>
+    <div id="test-area" style="float:left">
+      <p>You will see two hello-custom-element here</p>
+
+      <div id='custom-elements'>
+        <hello-custom-element 
+          world="The first custom element"
+          my-number="123.456"
+          my-boolean="false"
+          onclick="javascript:void(0)"
+          aria-text="ignore this binding"
+          data-x="ignore this binding"
+          style="border: transparent"
+          class="ignore this binding"
+          dir="ignore this binding"
+          lang="ignore this binding"
+          tabindex="ignore this binding"
+          title="ignore this binding">
+        </hello-custom-element>
+        <hello-custom-element world="The second custom element">
+        </hello-custom-element>
+      </div>
+      <div>Message: <span id="message">N/A</span></div>
+
+      <button onclick="document.querySelector('hello-custom-element').remove()">
+        Remove hello-custom-element
+      </button>
+      <button onclick="document.querySelector('#custom-elements').appendChild(document.createElement('hello-custom-element'))">
+        Add one
+      </button>
+    </div>
+
+    <div id="test-list" style="float:left; padding: 12px">
+      <h2>Test List</h2>
+      <ul>
+        <li>I see two &lt;hello-custom-element></li>
+        <li>I see 'First Custom Element'></li>
+        <li>I see 'Second Custom Element'></li>
+        <li>I click, the message changes</li>
+        <li>
+          Element property binding check
+          <ul>
+            <li>world: 'The first custom element'</li>
+            <li>myNumber: 123.456</li>
+            <li>myBoolean: false</li>
+            <li>onclick: null</li>
+            <li>datax: null</li>
+            <li>lang: null</li>
+            <li>style: null</li>
+            <li>class: null</li>
+            <li>dir: null</li>
+            <li>tabindex: null</li>
+            <li>title: null</li>
+          </ul>
+        </li>
+        <li>When I add new one, I see a new element</li>
+        <li>There must be only one &lt;style> tag for this in &lt;head>...&lt;/head></li>
+        <li>When I remove, it removes</li>
+        <li>When I remove all, there is no &lt;style> tag in header</li>
+      </ul>
+    </div>
   </body>
 </html>

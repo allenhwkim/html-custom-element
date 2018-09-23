@@ -1,9 +1,13 @@
-import {HTMLCustomElement} from '../src';
+import {HTMLCustomElement, createCustomEvent} from '../src';
 
 const template = `
-  <div class="hello-ce session-indicator" on-click="foo">
+  <!-- session-indicator is to test something unexpected one -->
+  <!-- on-hover="xxxxxx" is to test unbindable event function -->
+  <div class="hello-ce session-indicator"
+    on-hover="xxxxxx"
+    on-click="foo">
     <h3>Hello {{world}}.</h3>
-    Click me to fire CustomEvent \`foo\`;
+    Click me to fire CustomEvent \`my-custom-event\`;
   </div>`;
 
 const css = `
@@ -20,13 +24,23 @@ const css = `
 
 export class HelloCustomElement extends HTMLCustomElement {
   connectedCallback() {
-    this.template = template;
-    this.css = css;
-    this.render();
+    this.renderWith(template, css).then(el => {
+      console.log('render done', el);
+    })
   }
 
   foo() {
-    alert('foo');
+    const myEvent = createCustomEvent('my-custom-event', {
+      bubbles: true,
+      detail: 'custom event contents' 
+    });
+    this.dispatchEvent(myEvent);
   }
 }
+
 HelloCustomElement.define('hello-custom-element', HelloCustomElement);
+
+document.body.addEventListener('my-custom-event', event => {
+  document.querySelector('#message').innerHTML = 'custom event from ' +
+    event.target.getAttribute('world');
+});
