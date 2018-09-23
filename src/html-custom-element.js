@@ -60,10 +60,14 @@ function setEvents() {
     Array.from(elWithEvent.attributes).forEach(attr => {
       if (attr.name.match(/^on-/)) {
         const eventName = toCamelCase(attr.name.replace(/^on-/,''));
-        elWithEvent.addEventListener(
-          eventName, 
-          this[attr.value].bind(this)
-        );
+        if (this[attr.value]) {
+          elWithEvent.addEventListener(
+            eventName, 
+            this[attr.value].bind(this)
+          );
+        } else {
+          console.error(`[html-custom-element] ${attr.name} defined, but a function not found in`, this);
+        }
       }
     })
   });
