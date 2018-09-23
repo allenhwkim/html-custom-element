@@ -8,6 +8,8 @@ const template = `
     on-click="foo">
     <h3>Hello {{world}}.</h3>
     Click me to fire CustomEvent \`my-custom-event\`;
+    <br/>
+    translation: {{i18n.translation}}
   </div>`;
 
 const css = `
@@ -24,6 +26,7 @@ const css = `
 
 export class HelloCustomElement extends HTMLCustomElement {
   connectedCallback() {
+    this.i18n= {translation: "Internationalization"};
     this.renderWith(template, css).then(el => {
       console.log('render done', el);
     })
