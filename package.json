@@ -19,13 +19,11 @@
     "url": "https://github.com/allenhwkim/html-custom-element/issues"
   },
   "homepage": "https://github.com/allenhwkim/html-custom-element#readme",
-  "dependencies": {
+  "devDependencies": {
     "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-plugin-transform-es2015-classes": "^6.24.1",
     "document-register-element": "^1.9.1",
-    "mustache": "^2.3.0"
-  },
-  "devDependencies": {
+    "mustache": "^2.3.0",
     "@babel/polyfill": "^7.0.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
