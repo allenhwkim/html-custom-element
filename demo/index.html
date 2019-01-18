@@ -1,16 +1,34 @@
 <html>
+  <head>
+    <style>
+      hello-custom-element {display: inline-block; margin: 4px;}
+      one-way-bind-test {display: inline-block; margin: 4px; border: 1px solid #ccc;}
+      .test-area { display: inline-block; width: 30%; vertical-align: top}
+      .test-list { display: inline-block; width: 45%;}
+    </style>
+    <script>
+      function removeLast() {
+        const el = document.querySelector('hello-custom-element:last-child')
+        el && el.remove();
+      }
+      function addOne() {
+        const parent = document.querySelector('#custom-elements');
+        const newEl = document.createElement('hello-custom-element');
+        newEl.world = 'MORE';
+        newEl.myNumber = Math.floor(Math.random() * 999);
+        newEl.myBoolean = false;
+        parent.appendChild(newEl);
+      }
+    </script>
+  </head>
   <body>
     <h1>Hello html-custom-element !</h1>
 
-    <div id="test-area" style="float:left">
+    <div class="test-area">
       <p>You will see two hello-custom-element here</p>
 
       <div id='custom-elements'>
-        <hello-custom-element 
-          world="The first custom element"
-          my-number="123.456"
-          my-boolean="false"
-          onclick="javascript:void(0)"
+        <hello-custom-element world="ONE" my-number="123.456" my-boolean="false"
           aria-text="ignore this binding"
           data-x="ignore this binding"
           style="border: transparent"
@@ -20,47 +38,42 @@
           tabindex="ignore this binding"
           title="ignore this binding">
         </hello-custom-element>
-        <hello-custom-element world="The second custom element">
+        <hello-custom-element world="TWO" my-number="654.321" my-boolean="true">
         </hello-custom-element>
       </div>
       <div>Message: <span id="message">N/A</span></div>
 
-      <button onclick="document.querySelector('hello-custom-element').remove()">
-        Remove hello-custom-element
-      </button>
-      <button onclick="document.querySelector('#custom-elements').appendChild(document.createElement('hello-custom-element'))">
-        Add one
-      </button>
+      <button onclick="removeLast()">Remove one</button>
+      <button onclick="addOne()">Add one</button>
+
+      <hr />
+      <one-way-bind-custom-element hello="HELLO">
+        <div>This is to test one way binding</div>
+        <div class="ce-bindings"></div>
+      </one-way-bind-custom-element>
     </div>
 
-    <div id="test-list" style="float:left; padding: 12px">
+    <div class="test-list">
       <h2>Test List</h2>
       <ul>
-        <li>I see two &lt;hello-custom-element&lt;</li>
-        <li>I see 'First Custom Element'&lt;</li>
-        <li>I see 'Second Custom Element'&lt;</li>
-        <li>I see translated 'Internalizatoin'&lt;</li>
-        <li>I click, the message changes</li>
-        <li>
-          Element property binding check
-          <ul>
-            <li>world: 'The first custom element'</li>
-            <li>myNumber: 123.456</li>
-            <li>myBoolean: false</li>
-            <li>onclick: null</li>
-            <li>datax: null</li>
-            <li>lang: null</li>
-            <li>style: null</li>
-            <li>class: null</li>
-            <li>dir: null</li>
-            <li>tabindex: null</li>
-            <li>title: null</li>
-          </ul>
+        <li>I see "Hello ONE"</li>
+        <li>I see "Hello TWO"</li>
+        <li>I see "number: 123.456"</li>
+        <li>I see "boolean: false"</li>
+        <li>I see "number: 654.321"</li>
+        <li>I see "boolean: true"</li>
+        <li>I see "i18n: i18n"</li>
+        <li>I click the first, and I see "custom event from 'ONE'"</li>
+        <li>I click the second, and I see "custom event from 'TWO'"</li>
+        <li>I click "Add one", and I see "Hello MORE"</li>
+        <li>I see "num style tag with id: 1"</li>
+        <li>I click "Remove one" three times</li>
+        <li>I see "num style tag with id: 0"</li>
+        <li>I click "Add one", and I see "Hello MORE"</li>
+        <li>I see "num style tag with id: 1"</li>
+        <li>These property must not bind;
+           click / dataX / lang / style / class / dir / tabindex / title
         </li>
-        <li>When I add new one, I see a new element</li>
-        <li>There must be only one &lt;style> tag for this in &lt;head>...&lt;/head></li>
-        <li>When I remove, it removes</li>
-        <li>When I remove all, there is no &lt;style> tag in header</li>
       </ul>
     </div>
   </body>

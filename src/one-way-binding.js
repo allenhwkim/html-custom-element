@@ -1,119 +1,147 @@
-// var validator = require('html-validator');
-// validator({data: '<div>', format: 'json'}).then( ..... )
-// import {JSDOM} from 'jsdom';
-  
-  const html=`
-    <div class="container">
-      <!-- this is comment -->
-      <div>
-        {{hello}} My current hero is {{currentHero.name}}
-        <span> spacing </span>
-        My next hero is {{nextHero.name}}
-      </div>
-      <h3>
-        {{hello}}
-        {{hello}}
-        {{title}}
-      </h3>
-      <img src="{{heroImageUrl()}}" style="height:30px" />
-      <br />
-      <span bar="{{hello}}" 
-        [hidden]="isUnchanged"
-        [foo]="fooValue()">
-        changed
-      </span>
-      <button 
-        (click)="deleteHero(event, a, b)" 
-        (mouseover)="bar()"
-        (mouseout)="foo">
-        {{hello}} button
-      </button>
-    </div>
-    `;
+/**
+ *
+ * Find new value of expressions in custom element, and set html, attribute, or property
+ * 
+ * example of expression 
+ * { 
+ *   expression: 'hero.name',
+ *   value: 'new value',
+ *   bindings: [
+ *     {el: <span>, type: 'innerHTML', attrName: 'foo', propName: 'hidden'}
+ *   ]
+ * },
+ */
+export function bindExpressions(custEl, expressions) {
+  // loop through expressions and compare the value of expression
+  expressions.forEach(expr => {
+    const func = new Function(`return this.${expr.expression};`);
+    const newValue = func.bind(custEl)();
+
+    // if value of expression is different from previous value
+    if ( expr.value !== newValue) {
+      // console.log(
+      //   `expression "${expr.expression}" value is changed to "${newValue}"`,
+      //   `binding it to`, 
+      //   expr.bindings.map(_ => _.el)
+      // );
+      expr.value = newValue || '';
+
+      // replace value html, attribute, or property with new value
+      expr.bindings.forEach(binding => {
+        switch(binding.type) {
+          case 'innerHTML':
+            binding.el.innerHTML = `${newValue || ''}`;
+            break;
+          case 'attribute':
+            binding.el.setAttribute(binding.attrName, newValue);
+            break;
+          case 'property':
+            binding.el[binding.propName] = newValue;
+            break;
+        }
+      })
+    }
+  });
+
+}
+
+/**
+ * 
+ *  Add event listener to each element
+ * 
+ * example of event 
+ * { 
+ *   el: <span>,
+ *   bindings: [
+ *     {eventName: 'click', funcName: 'foo', args: ['event', 'this.x'..] }
+ *   ]
+ * },
+ */
+export function bindEvents(custEl, events) { // el - custom element
+  events.forEach(eventBinding => {
+    const bindingEl = eventBinding.el;
+    eventBinding.bindings.forEach(binding => {
+
+      const func = new Function(
+        'event', 
+        `return ${binding.funcName}(${binding.args.join(',')})`
+      );
+
+      bindingEl.addEventListener(binding.eventName, func.bind(custEl));
+    });
+  })
+}
+
 
 /**
  * 
  * One way binding helper for an element
+ * Parse the given html and prepare expressions, events, and converted html
  * 
- * @example
+ *  expressions: 
+ *    1. interpolation e.g. <span>{{hello.name}}</span>
+ *    2. attribute name with bracket e.g. <foo [propName]="foo.bar">
+ *    3. attribute value with interpolation e.g. <foo title="{{hello.name}}"}">
+ * 
+ *  events: 
+ *    1. attribute name with round bracketg e.g. <foo (click)="doSomething(e)">
+ * 
+ * @param html        html string
+ *
+ * @props newHtml     newly replaced html for bindings ready
+ * @props expressions expressions binding table
+ * @props events      event bindigs table
+ * 
+ * @usage
+ *   import {OnewayBinding, bindExpressions, bindEvents} from 'one-way-binding';
  *   const binding = new OneWayBinding(html);
  *   console.log(
- *     binding.newHtml,
- *     binding.expressions,
- *     binding.events
+ *     binding.newHtml,     // array
+ *     binding.expressions, // array
+ *     binding.events       // array
  *   );
  * 
  *   // Within in custom element
- *   binding.bindExpressions(el);
- *   binding.bindEvents(el)
- * 
- * @param html string
- * @props html original html
- * @props newHtml newly replace html for bindings ready
- * @props expressions expressions binding table
- * @props events event bindigs table
- * 
- * @function getEventHandler(expression) -> event handler function
+ *   bindExpressions(el, binding.expressions);
+ *   bindEvents(el, binding.events)
  */
-class OneWayBinding {
+export class OneWayBinding {
 
   constructor(html) {
-    this.expressions = {};
-    this.events = {};
+    this.expressions = [];
+    this.events = [];
     this.html = html;
     this.newHtml = this.__getNewHtml();
-
   }
 
-  bindExpressions(el) {
-    const expressions = this.expressions;
-    
-    for (var key in expressions) {
-      const expression = expressions[key];
-      const func = new Function(`return this.${key};`);
-      const oldValue = expression.value;
-      const newValue = func.bind(el)();
+  setBindingDOMElements(el) {
+    const selectors = [];
 
-      if (oldVaue !== newVaue) {
-        const bindings = expression.bindings;
-        expression.value = newValue;
+    this.expressions.forEach(expr => {
+      expr.bindings.forEach(binding => {
+        selectors.push(binding.el);
+        binding.el = el.querySelector(`[${binding.el}]`);
+      })
+    });
 
-        bindings.forEach(binging => {
-          const el = el.querySelector(binding.el);
-          switch(binding.type) {
-            case 'innerHTML':
-              el.innerHTML = `${newValue}`;
-              break;
-            case 'attribute':
-              el.setAttribute(binding.attrName, newValue);
-              break;
-            case 'property':
-              el[binding.propName] = newValue;
-              break;
-          }
-        })
-      }
+    this.events.forEach(evt => {
+      selectors.push(evt.el);
+      evt.el = el.querySelector(`[${evt.el}]`);
+    });
+
+    selectors.forEach(hash => {
+      const elWithHash = el.querySelector(`[${hash}]`);
+      elWithHash && elWithHash.removeAttribute(hash);
+    })
+  }
+
+  __setExprBindings(expression, value) {
+    const expr = this.expressions.find(el => el.expression === expression);
+    if (expr) {
+      expr.bindings.push(value);
+    } else {
+      this.expressions.push({expression, value: null, bindings: [value]});
     }
-  }
-
-  bindEvents(el) {
-    const events = this.events;
-    for(var key in events) {
-      const el = el.querySelector(key);
-      for (var eventName in events[key]) {
-        const data = events[key][eventName];
-        const func = new Function('event', 
-          `return ${data.funcName}(${data.args.join(',')})`
-        );
-        el.addEventListener(eventName, func.bind(el));
-      }
-    }
-  }
-
-  __setBindings(key, value) {
-    this.expressions[key] = 
-      this.expressions[key] || { value: null, bindings: [] };
-    this.expressions[key].bindings.push(value);
   }
 
   __getNewHtml() {
@@ -125,28 +153,37 @@ class OneWayBinding {
   }
     
   __eventParsed(str) {
-    const [_, _1, _2] = str.match(/^(\w+)(\(*.*?\))?$/);
-    const funcName = `this.${_1}`;
-    const argStr = (_2||'').replace(/[()]/g,'') || 'event';
-    const args = argStr.split(',').map(arg => 
-      arg.trim() === 'event' ? arg.trim() : `this.${arg.trim()}`
-    );
-    return [funcName, args];
+    const [match, _1, _2] = str.match(/^(\w+)(\(*.*?\))?$/);
+    if (match) {
+      const funcName = `this.${_1}`;
+      const argStr = (_2||'').replace(/[()]/g,'') || 'event';
+      const args = argStr.split(',').map(el => {
+        const arg = el.trim();
+        if (arg === 'event') return 'event';
+        else if (arg.match(/^[0-9]/))         return  arg; // number
+        else if (arg.match(/^(true|false)$/)) return arg;  // boolean
+        else if (arg.match(/^['"].*['"]$/))   return arg;  // string
+        else return `this.${arg}`
+      });
+      return [funcName, args];
+    }
   }
 
   __runChildren(node) {
     if (node.nodeType === Node.ELEMENT_NODE) {
       this.__bindElement(node);
-    } else if (
-      node.nodeType === Node.TEXT_NODE && node.nodeValue.match(/{{(.*?)}}/)
-    ) {
-      this.__bindInnerHTML(node);
+    } else if (node.nodeType === Node.TEXT_NODE) {
+      if (node.nodeValue.match(/{{(.*?)}}/)) {
+        this.__bindInnerHTML(node);
+      }
     }
 
     var childNodes = node.childNodes;
     for (var i = 0; i < childNodes.length; i++) {
       const childNode = childNodes[i];
-      if (childNode.childNodes) {
+      if (childNode.hasAttribute && childNode.hasAttribute('ce-no-bind')) {
+        console.log('found ce-no-bind. skipping binding');
+      } else if (childNode.childNodes) {
         this.__runChildren(childNode);
       }
     }
@@ -158,7 +195,9 @@ class OneWayBinding {
 
       attr.name.match(/^\[(.*?)\]$/) && this.__bindElementProperty(el, attr);
       attr.value.match(/{{(.*?)}}/) && this.__bindAttribute(el, attr);
-      attr.name.match(/^\(.*?\)$/) && this.__bindElementEvent(el, attr);
+      if (attr.name.match(/^\(.*?\)$/) || attr.name.match(/^on-(.*?)/)) {
+        this.__bindElementEvent(el, attr);
+      }
     }
   }
 
@@ -175,8 +214,8 @@ class OneWayBinding {
   __bindInnerHTML(node) {
     node.nodeValue =  node.nodeValue.replace(/{{(.*?)}}/g, (match, expression) => {
       const hash = this.__getHash();
-      this.__setBindings(expression, {
-        el: `[${hash}]`,
+      this.__setExprBindings(expression, {
+        el: hash,
         type: 'innerHTML',
         orgHtml: match
       });
@@ -190,8 +229,8 @@ class OneWayBinding {
     el.bindingHash = el.bindingHash || this.__getHash();
     el.setAttribute(el.bindingHash, '');
     const matches = attr.name.match(/^\[(.*?)\]$/);
-    this.__setBindings(attr.value, {
-      el: `[${el.bindingHash}]`,
+    this.__setExprBindings(attr.value, {
+      el: el.bindingHash,
       type: 'property',
       propName: matches[1],
       orgHtml: `${attr.name}="${attr.value}"`
@@ -202,33 +241,37 @@ class OneWayBinding {
     el.bindingHash = el.bindingHash || this.__getHash();
     el.setAttribute(el.bindingHash, '');
     const matches = attr.value.match(/{{(.*?)}}/);
-    this.__setBindings(matches[1], {
-      el: `[${el.bindingHash}]`,
+    this.__setExprBindings(matches[1], {
+      el: el.bindingHash,
       type: 'attribute',
       attrName: attr.name,
       orgHtml: `${attr.name}="${attr.value}"`
     });
   }
 
+
   __bindElementEvent(el, attr) {
     el.bindingHash = el.bindingHash || this.__getHash();
     el.setAttribute(el.bindingHash, '');
-    const matches = attr.name.match(/^\((.*?)\)$/);
-    this.events[`[${el.bindingHash}]`] = 
-      this.events[`[${el.bindingHash}]`] || {};
 
-    const [funcName, args] = this.__eventParsed(attr.value);
-    this.events[`[${el.bindingHash}]`][matches[1]] = {
-      funcName: funcName,
-      args: args,
-      orgHtml: `${attr.name}="${attr.value}"`
+    const found = this.events.find(event => event.el === el.bindingHash);
+    if (!found) {
+      this.events.push({el: el.bindingHash, bindings: []});
+    }
+
+    const event = this.events.find(event => event.el === el.bindingHash);
+    const eventParsed = this.__eventParsed(attr.value);
+    if (eventParsed) {
+      const [funcName, args] = this.__eventParsed(attr.value);
+      let eventName;
+      if (attr.name.match(/^\((.*?)\)$/)) {
+        eventName = attr.name.match(/^\((.*?)\)$/)[1];
+      } else if (attr.name.match(/^on-(.*?)/)) {
+        eventName = attr.name.replace('on-','');
+      }
+
+      event.bindings.push({eventName, funcName, args});
     }
   }
 
 }
-
-const onewayBinding = new OneWayBinding(html);
-document.querySelector('#expressions').innerHTML = 
-  JSON.stringify(onewayBinding.expressions, null, '    ');
-document.querySelector('#events').innerHTML = 
-  JSON.stringify(onewayBinding.events, null, '    ');

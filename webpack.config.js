@@ -4,15 +4,23 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const pkgJson = require('./package.json');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 let config = {
+  mode: 'production',
   entry: [
-    // 'babel-polyfill',   100K
     'core-js/fn/reflect/construct', 
-    // 'core-js/fn/promise',  
-    // 'core-js/fn/array',
+    'core-js/es6/array',
     './src/index.js'
   ],
+  optimization: {
+    minimizer: [ new UglifyJsPlugin({
+      sourceMap: true,
+      uglifyOptions: {
+        compress: { warnings: false }
+      }
+    })],
+  },
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'html-custom-element.umd.js',
@@ -40,18 +48,13 @@ let config = {
   devtool: '#source-map',
   plugins: [
     new CleanWebpackPlugin(['dist/*']),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      compress: {
-        warnings: false
-      }
-    }),
     new CopyWebpackPlugin([{ from: 'typings/*', to: '', flatten: true}])
   ]
 }
 
 if (process.env.NODE_ENV === 'development') {
   config = Object.assign(config, {
+    mode: 'development',
     entry: {
       app: './demo'
     },
@@ -67,7 +70,8 @@ if (process.env.NODE_ENV === 'development') {
         filename: 'index.html',
         template: 'demo/index.html',
         inject: true
-      })
+      }),
+      new CopyWebpackPlugin([{from: 'demo/chrome.png', to: 'chrome.png'}])
     ]
   });
 }
