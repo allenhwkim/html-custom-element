@@ -24,9 +24,8 @@ const template = `
 
     <br/>
     <div ce-no-bind (click)="click(event)">
-      With "ce-no-bind" attribute, binding does not work.
-      <div> {{hello}} My current hero is {{hero.current}}. </div>
-      My next hero is {{hero.next()}}
+      With "ce-no-bind" attribute, one way binding is ignored.
+      <div> {{hello}} My current hero is {{hero.current}}. My next hero is {{hero.next()}}</div>
     </div>
   </div>
 `;

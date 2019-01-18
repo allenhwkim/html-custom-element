@@ -30,7 +30,8 @@ export function bindExpressions(custEl, expressions) {
       expr.bindings.forEach(binding => {
         switch(binding.type) {
           case 'innerHTML':
-            binding.el.innerHTML = `${newValue || ''}`;
+            const innerHTML = typeof newValue === 'undefined' ? '' : newValue;
+            binding.el.innerHTML = `${innerHTML}`;
             break;
           case 'attribute':
             binding.el.setAttribute(binding.attrName, newValue);
