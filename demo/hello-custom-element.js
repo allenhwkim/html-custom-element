@@ -1,15 +1,13 @@
 import { HTMLCustomElement, createCustomEvent } from '../src';
 
 const template = `
-  <!-- session-indicator is to test something unexpected one -->
-  <!-- on-hover="xxxxxx" is to test unbindable event function -->
   <div class="hello-ce session-indicator"
     on-hover="xxxxxx"
     on-click="foo">
     <h3>Hello {{world}}.</h3>
     number: {{myNumber}}<br/> 
     boolean: {{myBoolean}} <br/>
-    <button>Click me to fire \`hello-event\`</button><br/>
+    <button class="hello-custom-element">Click me to fire \`hello-event\`</button><br/>
     i18n: {{i18n.translation}}
   </div>`;
 

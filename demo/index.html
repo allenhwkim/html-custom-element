@@ -42,8 +42,8 @@
         </hello-custom-element>
       </div>
       <div>Message: <span id="message">Click a button to see this message</span></div>
-      <button onclick="removeLast()">Remove one</button>
-      <button onclick="addOne()">Add one</button>
+      <button id="remove-one" onclick="removeLast()">Remove one</button>
+      <button id="add-one" onclick="addOne()">Add one</button>
 
       <hr />
       <one-way-bind-custom-element hello="HELLO">
@@ -53,27 +53,10 @@
     </div>
 
     <div class="test-list">
-      <h2>Test List</h2>
-      <ul>
-        <li>I see "Hello ONE"</li>
-        <li>I see "Hello TWO"</li>
-        <li>I see "number: 123.456"</li>
-        <li>I see "boolean: false"</li>
-        <li>I see "number: 654.321"</li>
-        <li>I see "boolean: true"</li>
-        <li>I see "i18n: i18n"</li>
-        <li>I click the first, and I see "custom event from 'ONE'"</li>
-        <li>I click the second, and I see "custom event from 'TWO'"</li>
-        <li>I click "Add one", and I see "Hello MORE"</li>
-        <li>I see "num style tag with id: 1"</li>
-        <li>I click "Remove one" three times</li>
-        <li>I see "num style tag with id: 0"</li>
-        <li>I click "Add one", and I see "Hello MORE"</li>
-        <li>I see "num style tag with id: 1"</li>
-        <li>These property must not bind;
-           click / dataX / lang / style / class / dir / tabindex / title
-        </li>
+      <h2>Tests</h2>
+      <ul id="test-results">
       </ul>
     </div>
+
   </body>
 </html>

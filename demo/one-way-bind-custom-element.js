@@ -1,7 +1,7 @@
 import { HTMLCustomElement, createCustomEvent } from '../src';
 
 const template = `
-  <div>
+  <div style="border:1px dashed #ccc">
     <h3> {{hello}} {{world}} {{hero.name}} </h3>
     <!-- this is comment -->
     <div>
@@ -14,11 +14,12 @@ const template = `
       <span bar="{{hello}}" [current]="hero.current" [next]="hero.next()">
         attribute/property binding test
       </span><br/>
-      <button 
-        (click)="click(event, hero.name, true)" 
+      <button id="one-way-binding"
+        (click)="click(event, 'One Way Binding', 'Current Updated')" 
         (mouseover)="mouseover(event, '')"
         (mouseout)="mouseout">
-        event binding <img src="{{hero.img()}}" style="height:30px" />
+        Click here to see binding changes
+        <img src="{{hero.img()}}" style="height:30px" />
       </button>
     <div>
 
@@ -43,15 +44,19 @@ class OneWayBindCustomElement extends HTMLCustomElement {
   }
 
   mouseout(event) {
-    console.log(event);
+    event.target.style.textShadow = 'none';
   }
 
   mouseover(event, a) {
-    console.log(a, event);
+    event.target.style.textShadow = '0 0 .65px #333, 0 0 .65px';
   }
 
-  click(event, a, b) {
-    console.log(a, b, event);
+  click(event, name, current) {
+    this.hello = 'Hi';
+    this.hero.name = name;
+    this.hero.current = current;
+    this.hero.next = () => 'Next Hero';
+    this.detectChanges();
   }
 
 }
