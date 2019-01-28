@@ -9,7 +9,7 @@ test('can set head style element with id', () => {
   const styleEl = setStyleEl(css);
 
   expect(styleEl.numEl).toBe(1);
-  expect(styleEl.id).toMatch(/^ce/);
+  expect(styleEl.id).toMatch(/^hce/);
   expect(document.querySelectorAll('style').length).toBe(1);
 
   setStyleEl(css); // set style multiple times
@@ -75,19 +75,19 @@ describe('HTMLCustomElement', function () {
   });
 
   it('#disconnectedCallback', function () {
-    // cannot test since the following does not work
+    // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });
 
   it('#renderWith', function () {
-    // cannot test since the following does not work
+    // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });
 
   it('#detectChanges', function () {
-    // cannot test since the following does not work
+    // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });

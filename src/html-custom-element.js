@@ -8,11 +8,13 @@ export function setStyleEl(css) {
       hash = ((hash << 5) - hash) + str.charCodeAt(i);
       hash = hash & hash;
     }
-    return 'ce'+Math.abs(hash).toString(16);
+    return 'hce'+Math.abs(hash).toString(16);
   }
 
   const hash = hashCode(css);
-  const scopedCss = css.replace(/^([^@][a-z\.\ ])+\{/gm, m => `[${hash}] ${m}`);
+  const scopedCss = css.replace(/\s?([^@][\:\>\*\~\[\]\-\(\)a-z\.\ ])+?\{/gm, m => {
+    return `\n\.${hash} ${m.trim()}`.replace(/\s*:root/g, '');
+  });
 
   let styleEl = document.querySelector(`style#${hash}`);
   if (styleEl) {
@@ -64,11 +66,15 @@ export class HTMLCustomElement extends HTMLElement {
 
   /* istanbul ignore next */
   disconnectedCallback() {
-    this.styleEl && !(this.styleEl.numEl--) && this.styleEl.remove();
+    if (this.styleEl) {
+      this.styleEl.numEl--;
+      (!this.styleEl.numEl) && this.styleEl.remove();
+    }
   } 
 
   /* istanbul ignore next */
-  renderWith(template, css) {
+  renderWith(template, css, customCss) {
+    this.classList.add('hce');
     return new Promise( resolve => {
       // some framework bind properties after DOM rendered
       // so set propertes after rendering cycle
@@ -81,18 +87,23 @@ export class HTMLCustomElement extends HTMLElement {
         }
 
         if (template) {
-          const tmplTarget = this.querySelector('.ce-bindings') || this;
+          if (template.indexOf('<hce-content></hce-content>')) {
+            template = template.replace(/<hce-content><\/hce-content>/, this.innerHTML);
+          }
           this.binding = new OneWayBinding(template);
-          tmplTarget.innerHTML = this.binding.newHtml;;
+          this.innerHTML = this.binding.newHtml;;
 
-          this.binding.setBindingDOMElements(tmplTarget); //  from hash x7c5a, to DOM element
+          this.binding.setBindingDOMElements(this); //  from hash x7c5a, to DOM element
           this.detectChanges();
           bindEvents(this, this.binding.events);
         }       
 
         if (css) {
           this.styleEl = setStyleEl(css);  // insert <style> tag into header
-          this.setAttribute(this.styleEl.id, ''); // set attribute, e.g., g9k02js84, for stying
+          this.classList.add(this.styleEl.id); // set attribute, e.g., g9k02js84, for stying
+          if (customCss) {
+            this.styleEl.appendChild(document.createTextNode(customCss));
+          }
         }
 
         resolve(this);
