@@ -1,45 +1,22 @@
-import * as Mustache from 'mustache';    
 import 'document-register-element'; // IE11/FF CustomElement polyfill
+import { OneWayBinding, bindExpressions, bindEvents } from './one-way-binding';
 
-// new CustomEvent not working on IE11.
-if (!window.CustomEvent) {
-  let CustomEvent = function(event, params) {
-    params = params || { 
-      bubbles: false, 
-      cancelable: false
-    };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent(
-      event,
-      params.bubbles,
-      params.cancelable,
-      params.detail
-    );
-    return evt;
-   }
-
-  CustomEvent.prototype = window.Event.prototype;
-  window.CustomEvent = CustomEvent;
-}
-
-function hashCode(str) {
-  var hash = 0;
-  for (var i = 0, len = str.length; i < len; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash = hash & hash;
+export function setStyleEl(css) {
+  function hashCode(str) {
+    var hash = 0;
+    for (var i = 0, len = str.length; i < len; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return 'hce'+Math.abs(hash).toString(16);
   }
-  return 'ce'+Math.abs(hash).toString(16);
-}
 
-function toCamelCase(str) {
-  return (str||'').replace(/-([a-z])/gi, function(g) {
-    return g[1].toUpperCase();
-  }); 
-}
-
-function getStyleEl(css) {
+  css = css.replace(/,\s*?[\r\n]\s*?/gm, ', ');
   const hash = hashCode(css);
-  const scopedCss = css.replace(/^([^@][a-z\.\ ])+\{/gm, m => `[${hash}] ${m}`);
+  const scopedCss = css.replace(/\s?([^@][\:\>\*\~\[\]\-\(\)a-z\.\, ])+\{/gm, m => {
+    const selectors = m.split(/,\s*/).map(str =>  `.${hash} ${str}`.replace(/\s*:root/g, ''));
+    return `\n${selectors.join(', ')}`;
+  });
 
   let styleEl = document.querySelector(`style#${hash}`);
   if (styleEl) {
@@ -55,102 +32,136 @@ function getStyleEl(css) {
   return styleEl;
 }
 
-function getPropsFromAttributes(el) {
+export function getPropsFromAttributes(el) {
+  function toCamelCase(str) {
+    return str.replace(/-([a-z])/gi, function(g) {
+      return g[1].toUpperCase();
+    }); 
+  }
+  
+  // following is the list of default attributes for all html tags, which shouldn't be treated as custom. 
   const htmlAttrs = /^(on.*|aria-.*|data-.*|class|dir|hidden|id|is|lang|style|tabindex|title)$/;
   const props = {};
 
+  // TODO: get properties from the close hce element by searching '.hce'
+  // so that properties can be inherited to the child attributes
+  const parentHCE = el.closest('.hce');
+  if (parentHCE) {
+    parentHCE.hcePropKeys.forEach(propKey => props[propKey] = parentHCE[propKey])
+  }
+
   Array.from(el.attributes).forEach( attr => {
     if (!attr.name.match(htmlAttrs)) {  // ignore html common attributes
-      const propName = toCamelCase(attr.name);
+      const propName = attr.name.match(/^\(.*\)$/) ? attr.name : toCamelCase(attr.name);
       if (!el[propName]) {       // ignore if property already assigned
         try {
           props[propName] = JSON.parse(attr.value);
         } catch (e) {
           props[propName] = attr.value;
         }
+      } else {
+        // do nothing 
       }
     }
   });
   return props;
 }
 
-/**
- * add event listener that has on-* attribute
- */
-function setEventsWithOnAttributes(el) {
-  const elsWithEvents = el.querySelectorAll('*[bind-event]');
-  Array.from(elsWithEvents).forEach( elWithEvent => {
-    Array.from(elWithEvent.attributes).forEach(attr => {
-      if (attr.name.match(/^on-/)) {
-        const eventName = toCamelCase(attr.name.replace(/^on-/,''));
-        if (el[attr.value]) {
-          elWithEvent.addEventListener(eventName, el[attr.value].bind(el));
-        } else {
-          console.info(`[html-custom-element] ${attr.name} callback not defined`, el.tagName);
-        }
-      }
-    })
+export function bindEvent(el, eventName, expression) {
+  eventName = eventName.replace(/[\(\)]/g, '');
+  const [matches, $1, $2] = expression.match(/^(\w+)(\(*.*?\))?$/);
+  let funcName = $1, args = [];
+
+  const argStr = ($2||'').replace(/[()]/g,'') || 'event';
+  args = argStr.split(',').map(el => {
+    const arg = el.trim();
+    if (arg === 'event') return 'event';
+    else if (arg.match(/^[\-\.0-9]/))     return  arg; // number
+    else if (arg.match(/^(true|false)$/)) return arg;  // boolean
+    else if (arg.match(/^['"].*['"]$/))   return arg;  // string
+    else return `this.${arg}`
   });
+
+  const func = new Function('event', `return ${funcName}(${args.join(',')})`);
+
+  el.addEventListener(eventName, func.bind(el));
+}
+
+export function bindExpression(el, propName, expression) {
+  propName = propName.replace(/[\[\]]/g, '');
+  const func = new Function(`return ${expression};`);
+  try {
+    el[propName] = func();
+  } catch(e) {
+    console.error(e);
+    console.log(`Invalid expression, "${expression}" ${e.message}`);
+  }
 }
 
 // base class for all custom element
 export class HTMLCustomElement extends HTMLElement {
 
-  // Do NOT use constructor, buggy on several browsers, FF, IE, Chrome
-  // constructor(_) {  return (_ = super(_)).init(), _; }
-  // init() { /* override as you like */ }
-
   static define(tagName, klass) {
-    if (!customElements.get(tagName)) {
-      customElements.define(tagName, klass);
-    }
+    !customElements.get(tagName) && customElements.define(tagName, klass);
   }
 
-  /**
-   * some framework bind properties after DOM rendered
-   * so set propertes after rendering cycle
-   */
+  /* istanbul ignore next */
   disconnectedCallback() {
     if (this.styleEl) {
       this.styleEl.numEl--;
-      if (this.styleEl.numEl === 0) {
-        this.styleEl.remove();
-      }
+      (!this.styleEl.numEl) && this.styleEl.remove();
     }
   } 
-  
-  /**
-   * some framework bind properties after DOM rendered
-   * so set propertes after rendering cycle
-   */
-  renderWith(template, css) {
+
+  /* istanbul ignore next */
+  renderWith(template, css, customCss) {
     return new Promise( resolve => {
+      // some framework bind properties after DOM rendered
+      // so set propertes after rendering cycle
       setTimeout(_ => {
         const props = getPropsFromAttributes(this); // user-defined attributes
-        for (var prop in props) {
-          this[prop] = props[prop];
+        this.hcePropKeys = Object.keys(props);
+        for (var prop in props) { 
+          if (prop.match(/^\[.*\]$/)) { // e.g. [prop]="expression"
+            bindExpression(this, prop, props[prop]);
+          } else if (prop.match(/^\(.*\)$/) && props[prop]) {
+            bindEvent(this, prop, props[prop]);
+          } else {
+            // e.g. set properties using setters https://gist.github.com/patrickgalbraith/9538b85546b4e3841864
+            this[prop] = props[prop];
+          }
         }
 
         if (template) {
-          // set DOM with {{..}} replaced and added with bind-event
-          const newHtml = template.replace(/ on-[^\ =]+=/g, m => ' bind-event' + m);
-          this.innerHTML = Mustache.to_html(newHtml, this);
+          if (template.indexOf('<hce-content></hce-content>')) {
+            template = template.replace(/<hce-content><\/hce-content>/, this.innerHTML);
+          }
+          this.binding = new OneWayBinding(template);
+          this.innerHTML = this.binding.newHtml;;
 
-          setEventsWithOnAttributes(this); // register event listerner to on-* element
+          this.binding.setBindingDOMElements(this); //  from hash x7c5a, to DOM element
+          this.detectChanges();
+          bindEvents(this, this.binding.events);
         }       
 
         if (css) {
-          this.styleEl = getStyleEl(css);  // insert <style> tag into header
-          this.setAttribute(this.styleEl.id, ''); // set attribute, e.g., g9k02js84, for stying
+          this.styleEl = setStyleEl(css);  // insert <style> tag into header
+          this.classList.add(this.styleEl.id); // set attribute, e.g., g9k02js84, for stying
+          if (customCss) {
+            this.styleEl.appendChild(document.createTextNode(customCss));
+          }
         }
 
+        // adding this at the end so that this.closest('.hce') does not include itself
+        this.classList.add('hce'); 
         resolve(this);
       });
-    });
+    }); 
   }
 
-  render() { 
-    return this.renderWith(this.template, this.css);
+  /* istanbul ignore next */
+  detectChanges() {
+    bindExpressions(this, this.binding.expressions);
   }
 
 }
