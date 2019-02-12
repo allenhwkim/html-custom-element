@@ -4,7 +4,7 @@
   "version": "0.5.2",
   "author": "Allen Kim <allenhwkim@gmail.com>",
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "dist/html-custom-element.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm run build",
