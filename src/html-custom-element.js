@@ -11,9 +11,11 @@ export function setStyleEl(css) {
     return 'hce'+Math.abs(hash).toString(16);
   }
 
+  css = css.replace(/,\s*?[\r\n]\s*?/gm, ', ');
   const hash = hashCode(css);
-  const scopedCss = css.replace(/\s?([^@][\:\>\*\~\[\]\-\(\)a-z\.\ ])+?\{/gm, m => {
-    return `\n\.${hash} ${m.trim()}`.replace(/\s*:root/g, '');
+  const scopedCss = css.replace(/\s?([^@][\:\>\*\~\[\]\-\(\)a-z\.\, ])+\{/gm, m => {
+    const selectors = m.split(/,\s*/).map(str =>  `.${hash} ${str}`.replace(/\s*:root/g, ''));
+    return `\n${selectors.join(', ')}`;
   });
 
   let styleEl = document.querySelector(`style#${hash}`);
@@ -36,13 +38,21 @@ export function getPropsFromAttributes(el) {
       return g[1].toUpperCase();
     }); 
   }
-
+  
+  // following is the list of default attributes for all html tags, which shouldn't be treated as custom. 
   const htmlAttrs = /^(on.*|aria-.*|data-.*|class|dir|hidden|id|is|lang|style|tabindex|title)$/;
   const props = {};
 
+  // TODO: get properties from the close hce element by searching '.hce'
+  // so that properties can be inherited to the child attributes
+  const parentHCE = el.closest('.hce');
+  if (parentHCE) {
+    parentHCE.hcePropKeys.forEach(propKey => props[propKey] = parentHCE[propKey])
+  }
+
   Array.from(el.attributes).forEach( attr => {
     if (!attr.name.match(htmlAttrs)) {  // ignore html common attributes
-      const propName = toCamelCase(attr.name);
+      const propName = attr.name.match(/^\(.*\)$/) ? attr.name : toCamelCase(attr.name);
       if (!el[propName]) {       // ignore if property already assigned
         try {
           props[propName] = JSON.parse(attr.value);
@@ -55,6 +65,37 @@ export function getPropsFromAttributes(el) {
     }
   });
   return props;
+}
+
+export function bindEvent(el, eventName, expression) {
+  eventName = eventName.replace(/[\(\)]/g, '');
+  const [matches, $1, $2] = expression.match(/^(\w+)(\(*.*?\))?$/);
+  let funcName = $1, args = [];
+
+  const argStr = ($2||'').replace(/[()]/g,'') || 'event';
+  args = argStr.split(',').map(el => {
+    const arg = el.trim();
+    if (arg === 'event') return 'event';
+    else if (arg.match(/^[\-\.0-9]/))     return  arg; // number
+    else if (arg.match(/^(true|false)$/)) return arg;  // boolean
+    else if (arg.match(/^['"].*['"]$/))   return arg;  // string
+    else return `this.${arg}`
+  });
+
+  const func = new Function('event', `return ${funcName}(${args.join(',')})`);
+
+  el.addEventListener(eventName, func.bind(el));
+}
+
+export function bindExpression(el, propName, expression) {
+  propName = propName.replace(/[\[\]]/g, '');
+  const func = new Function(`return ${expression};`);
+  try {
+    el[propName] = func();
+  } catch(e) {
+    console.error(e);
+    console.log(`Invalid expression, "${expression}" ${e.message}`);
+  }
 }
 
 // base class for all custom element
@@ -74,16 +115,21 @@ export class HTMLCustomElement extends HTMLElement {
 
   /* istanbul ignore next */
   renderWith(template, css, customCss) {
-    this.classList.add('hce');
     return new Promise( resolve => {
       // some framework bind properties after DOM rendered
       // so set propertes after rendering cycle
       setTimeout(_ => {
         const props = getPropsFromAttributes(this); // user-defined attributes
+        this.hcePropKeys = Object.keys(props);
         for (var prop in props) { 
-          // TODO set properties using dyn. getter and setters
-          // e.g. https://gist.github.com/patrickgalbraith/9538b85546b4e3841864
-          this[prop] = props[prop];
+          if (prop.match(/^\[.*\]$/)) { // e.g. [prop]="expression"
+            bindExpression(this, prop, props[prop]);
+          } else if (prop.match(/^\(.*\)$/) && props[prop]) {
+            bindEvent(this, prop, props[prop]);
+          } else {
+            // e.g. set properties using setters https://gist.github.com/patrickgalbraith/9538b85546b4e3841864
+            this[prop] = props[prop];
+          }
         }
 
         if (template) {
@@ -106,6 +152,8 @@ export class HTMLCustomElement extends HTMLElement {
           }
         }
 
+        // adding this at the end so that this.closest('.hce') does not include itself
+        this.classList.add('hce'); 
         resolve(this);
       });
     }); 

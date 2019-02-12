@@ -58,7 +58,7 @@ export function bindExpressions(custEl, expressions) {
  *   ]
  * },
  */
-export function bindEvents(custEl, events) { // el - custom element
+export function bindEvents(el, events) { // el - custom element
   events.forEach(eventBinding => {
     const bindingEl = eventBinding.el;
     eventBinding.bindings.forEach(binding => {
@@ -68,7 +68,7 @@ export function bindEvents(custEl, events) { // el - custom element
         `return ${binding.funcName}(${binding.args.join(',')})`
       );
 
-      bindingEl.addEventListener(binding.eventName, func.bind(custEl));
+      bindingEl.addEventListener(binding.eventName, func.bind(el));
     });
   })
 }
@@ -161,7 +161,7 @@ export class OneWayBinding {
       const args = argStr.split(',').map(el => {
         const arg = el.trim();
         if (arg === 'event') return 'event';
-        else if (arg.match(/^[0-9]/))         return  arg; // number
+        else if (arg.match(/^[\-\.0-9]/))      return  arg; // number
         else if (arg.match(/^(true|false)$/)) return arg;  // boolean
         else if (arg.match(/^['"].*['"]$/))   return arg;  // string
         else return `this.${arg}`
