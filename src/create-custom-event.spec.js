@@ -34,13 +34,13 @@ test('can create a custom event from CustomEvent', () => {
 });
 
 test('can create a custom event from document.createEvent', () => {
-   const savedCustomEvent = global.CustomEvent;
-   delete global.CustomEvent;
-   const evt = createCustomEvent('my-event', {bubbles: true, detail: 'my detail'});
+  const savedCustomEvent = global.CustomEvent;
+  delete global.CustomEvent;
+  const evt = createCustomEvent('my-event', {bubbles: true, detail: 'my detail'});
 
-   expect(evt.constructor.name).toBe('CustomEvent');
-   expect(evt.detail).toBe('my detail');
-   expect(evt.type).toBe('my-event');
+  expect(evt.constructor.name).toBe('CustomEvent');
+  expect(evt.detail).toBe('my detail');
+  expect(evt.type).toBe('my-event');
 
-   global.CustomEvent = savedCustomEvent;`` 
+  global.CustomEvent = savedCustomEvent; ``;
 });

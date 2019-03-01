@@ -1,4 +1,4 @@
-import { HTMLCustomElement, createCustomEvent } from '../src';
+import {HTMLCustomElement, createCustomEvent} from '../src';
 
 const template = `
   <div style="border:1px dashed #ccc">
@@ -36,11 +36,11 @@ class OneWayBindCustomElement extends HTMLCustomElement {
     this.hello;
     this.hero = {
       name: 'HERO',
-      current: 'CURRENT', 
+      current: 'CURRENT',
       next: () => 'NEXT',
-      img: () => 'chrome.png'
+      img: () => 'chrome.png',
     };
-    this.renderWith(template).then(el => el)
+    this.renderWith(template).then((el) => el);
   }
 
   mouseout(event) {
@@ -58,7 +58,6 @@ class OneWayBindCustomElement extends HTMLCustomElement {
     this.hero.next = () => 'Next Hero';
     this.detectChanges();
   }
-
 }
 
 HTMLCustomElement.define('one-way-bind-custom-element', OneWayBindCustomElement);

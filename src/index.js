@@ -1,7 +1,7 @@
 // polyfill for element.closest()
 if (!Element.prototype.closest) {
   Element.prototype.closest = function(s) {
-    var el = this;
+    let el = this;
 
     do {
       if (el.matches(s)) return el;
@@ -11,5 +11,5 @@ if (!Element.prototype.closest) {
   };
 }
 
-export { HTMLCustomElement } from './html-custom-element';
-export { createCustomEvent } from './create-custom-event';
+export {HTMLCustomElement} from './html-custom-element';
+export {createCustomEvent} from './create-custom-event';

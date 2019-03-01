@@ -1,4 +1,4 @@
-import { HTMLCustomElement, createCustomEvent } from '../src';
+import {HTMLCustomElement, createCustomEvent} from '../src';
 
 const template = `
   <div class="hello-ce session-indicator"
@@ -15,16 +15,16 @@ const css = `
   @keyframes { blah; }
   h3 {margin: 0}
   .hello-ce { padding: 4px; min-width: 100px; background: blue; color: #fff }
-`; 
+`;
 
 class HelloCustomElement extends HTMLCustomElement {
   connectedCallback() {
-    this.i18n= {translation: "i18n"};
-    this.renderWith(template, css).then(el => console.log('render done', el))
+    this.i18n= {translation: 'i18n'};
+    this.renderWith(template, css).then((el) => console.log('render done', el));
   }
 
   foo(event) {
-    const myEvent = createCustomEvent('hello-event', {bubbles: true, detail: 'hello event' });
+    const myEvent = createCustomEvent('hello-event', {bubbles: true, detail: 'hello event'});
     this.dispatchEvent(myEvent);
   }
 }

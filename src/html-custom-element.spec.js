@@ -1,11 +1,17 @@
-import {setStyleEl, getPropsFromAttributes, HTMLCustomElement} from './html-custom-element';
+import {
+  setStyleEl,
+  getPropsFromAttributes,
+  bindEvent,
+  bindExpression,
+  HTMLCustomElement,
+} from './html-custom-element';
 
 beforeEach(() => {
   // Jest will wait for this promise to resolve before running tests.
 });
 
 test('can set head style element with id', () => {
-  const css = `.my-class {color: red; }`
+  const css = `.my-class {color: red; }`;
   const styleEl = setStyleEl(css);
 
   expect(styleEl.numEl).toBe(1);
@@ -20,7 +26,10 @@ test('can set head style element with id', () => {
 
 
 test('can get props from attributes', () => {
-  document.body.insertAdjacentHTML('beforeend', `
+  const fakeHCE = document.createElement('fake-hce');
+  fakeHCE.classList.add('hce');
+  fakeHCE.hcePropKeys = ['foo', 'bar'];
+  fakeHCE.insertAdjacentHTML('beforeend', `
     <hello-custom-element
       onclick="alert('ignore this binding')"
       class="ignore this binding"
@@ -34,9 +43,11 @@ test('can get props from attributes', () => {
       title="ignore this bind"
       tabindex="1"
       world="ONE"
+      (one)="two(event)"
       my-number="123.456"
       my-boolean="false">
     </hello-custom-element>`);
+  document.body.append(fakeHCE);
   const el = document.querySelector('hello-custom-element');
 
   const props = getPropsFromAttributes(el);
@@ -59,12 +70,26 @@ test('can get props from attributes', () => {
   expect(props.title).toBeFalsy();
 });
 
-describe('HTMLCustomElement', function () {
-  beforeEach(function () {
+test('#bindEvent', () => {
+  const el = document.createElement('hce');
+  global.doSomething = (_) => null;
+  bindEvent(el, 'foo', 'doSomething(1, true, "stirng", doSomething)');
+  bindEvent(el, 'foo', 'doSomething()');
+});
+
+test('#bindExpression', () => {
+  const el = document.createElement('hce');
+  global.doSomething = (_) => null;
+  bindExpression(el, 'foo', 'doSomething(1, true, "stirng", doSomething)');
+  bindExpression(el, 'foo', 'doSomething(1, true, "stirng", x)');
+});
+
+describe('HTMLCustomElement', function() {
+  beforeEach(function() {
     // Jest will wait for this promise to resolve before running tests.
   });
 
-  it('#define', function () {
+  it('#define', function() {
     // const ce = new HTMLCustomElement();
     class MyEl extends HTMLElement {}
     HTMLCustomElement.define('my-el', MyEl);
@@ -74,22 +99,33 @@ describe('HTMLCustomElement', function () {
     expect(customElements.get('my-el')).toBeTruthy();
   });
 
-  it('#disconnectedCallback', function () {
+  it('#disconnectedCallback', function() {
     // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });
 
-  it('#renderWith', function () {
+  it('#renderWith', function() {
     // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });
 
-  it('#detectChanges', function () {
+  it('#detectChanges', function() {
     // cannot test since the following does not work with jest test
     //   class HTMLCustomElement extends HTMLElement
     //   new HTMLCustomElement
   });
-  
+
+  it('#appear', function() {
+    // cannot test since the following does not work with jest test
+    //   class HTMLCustomElement extends HTMLElement
+    //   new HTMLCustomElement
+  });
+
+  it('#disappear', function() {
+    // cannot test since the following does not work with jest test
+    //   class HTMLCustomElement extends HTMLElement
+    //   new HTMLCustomElement
+  });
 });

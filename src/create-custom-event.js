@@ -8,13 +8,13 @@ export function createCustomEvent(eventName, options) {
   let event;
   if (typeof(CustomEvent) === 'function') {
     event = new CustomEvent(eventName, options);
-  }  else {
+  } else {
     event = document.createEvent('CustomEvent');
     event.initCustomEvent(
-      eventName,
-      options.bubbles,
-      options.cancelable,
-      options.detail
+        eventName,
+        options.bubbles,
+        options.cancelable,
+        options.detail
     );
   }
   return event;
