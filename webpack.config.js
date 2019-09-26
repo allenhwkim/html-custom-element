@@ -9,16 +9,16 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 let config = {
   mode: 'production',
   entry: [
-    'core-js/fn/reflect/construct', 
-    'core-js/es6/array',
+    'core-js/modules/es.reflect.construct',
+    'core-js/es/array',
     './src/index.js'
   ],
   optimization: {
     minimizer: [ new UglifyJsPlugin({
       sourceMap: true,
-      uglifyOptions: {
-        compress: { warnings: false }
-      }
+      // uglifyOptions: {
+      //   compress: { warnings: false }
+      // }
     })],
   },
   output: {
