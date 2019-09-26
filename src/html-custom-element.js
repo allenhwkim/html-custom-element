@@ -161,22 +161,4 @@ export class HTMLCustomElement extends HTMLElement {
   detectChanges() {
     bindExpressions(this, this.binding.expressions);
   }
-
-  /* istanbul ignore next */
-  disappear() {
-    const compStyle = window.getComputedStyle(this);
-    (compStyle.transitionDuration === '0s') && (this.style.transition = 'all .3s linear');
-    this.displayStyle = compStyle.display;
-    this.style.opacity = 0;
-    setTimeout((_) => this.style.display = 'none', 330);
-  }
-
-  /* istanbul ignore next */
-  appear(as) {
-    const compStyle = window.getComputedStyle(this);
-    (compStyle.transitionDuration === '0s') && (this.style.transition = 'all .3s linear');
-    this.style.display = as || this.displayStyle || 'block';
-    this.style.opacity = 0;
-    setTimeout((_) => this.style.opacity = 1, 20);
-  }
 }
